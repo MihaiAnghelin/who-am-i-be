@@ -1,0 +1,19 @@
+version: '3.0'
+
+services:
+  who-am-i-be:
+    container_name: who-am-i-be
+    image: who-am-i-be
+    ports:
+      - "5000:80"
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+  
+  who-am-i-fe:
+    container_name: who-am-i-fe
+    image: who-am-i-fe
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    
