@@ -8,7 +8,7 @@ using who_am_i_be.Models;
 namespace who_am_i_be.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("/api/auth")]
 public class AuthController : Controller
 {
     private readonly DataContext _context;
