@@ -21,8 +21,10 @@ public class DataContext : DbContext
         var connectionString = _configuration.GetConnectionString("DefaultConnection");
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
     }
-    
+
     public DbSet<Category> Categories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Character> Characters { get; set; }
+    public DbSet<Lobby> Lobbies { get; set; }
+    public DbSet<Player> Players { get; set; }
 }
