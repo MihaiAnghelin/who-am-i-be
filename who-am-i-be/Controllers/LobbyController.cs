@@ -23,6 +23,13 @@ public class LobbyController : Controller
             .Include(x => x.Players)
             .FirstOrDefaultAsync(x => x.Id == lobbyDTO.LobbyId);
 
+        if (lobby is null)
+            return new ServiceResultDTO
+            {
+                Error = "Lobby not found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
         var player = new Player
         {
             Id = default,
@@ -151,11 +158,11 @@ public class LobbyController : Controller
                 var character = lobby.Categories
                     .SelectMany(category => category.Characters)
                     .Where(character => lobby.Players.All(p => p.CharacterId != character.Id))
-                    .OrderBy(character => random.Next())
+                    .OrderBy(_ => random.Next())
                     .First();
 
                 player.Character = character;
-                
+
                 return new
                 {
                     PlayerId = player.Id,
@@ -167,14 +174,14 @@ public class LobbyController : Controller
 
         _context.Players.UpdateRange(lobby.Players);
         await _context.SaveChangesAsync();
-        
+
         return new ServiceResultDTO
         {
             Data = characters,
             StatusCode = StatusCodes.Status200OK
         };
     }
-    
+
     [HttpPost("rerollCharacter/{playerId}")]
     public async Task<ServiceResultDTO> RerollCharacter(Guid playerId)
     {
@@ -195,14 +202,14 @@ public class LobbyController : Controller
         var character = player.Lobby.Categories
             .SelectMany(category => category.Characters)
             .Where(character => player.Lobby.Players.All(p => p.CharacterId != character.Id))
-            .OrderBy(character => random.Next())
+            .OrderBy(_ => random.Next())
             .First();
 
         player.Character = character;
-        
+
         _context.Players.Update(player);
         await _context.SaveChangesAsync();
-        
+
         return new ServiceResultDTO
         {
             Data = new
@@ -214,17 +221,17 @@ public class LobbyController : Controller
             StatusCode = StatusCodes.Status200OK
         };
     }
-    
+
     [HttpDelete("removePlayer")]
     public async Task<ServiceResultDTO> RemovePlayer(RemovePlayerDTO lobbyDTO)
     {
-        if(!lobbyDTO.AdminPlayer.IsAdmin)
+        if (!lobbyDTO.AdminPlayer.IsAdmin)
             return new ServiceResultDTO
             {
                 Error = "Player is not admin",
                 StatusCode = StatusCodes.Status404NotFound
             };
-        
+
         var player = await _context.Players
             .Include(player => player.Lobby)
             .FirstOrDefaultAsync(player => player.Id == lobbyDTO.PlayerIdToRemove);
@@ -245,7 +252,7 @@ public class LobbyController : Controller
 
         _context.Players.Remove(player);
         await _context.SaveChangesAsync();
-        
+
         return new ServiceResultDTO
         {
             Data = "Player removed",
