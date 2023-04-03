@@ -57,7 +57,7 @@ public class AdminController : Controller
                 Error = "Category not found",
                 StatusCode = StatusCodes.Status404NotFound
             };
-        
+
         //remove all characters that are associated with this category
         var characters = await _context.Characters.Where(x => x.CategoryId == id).ToListAsync();
         _context.Characters.RemoveRange(characters);
@@ -75,9 +75,9 @@ public class AdminController : Controller
     }
 
     #endregion Categories Endpoints
-    
+
     #region Characters Endpoints
-    
+
     //get all characters
     [HttpGet("characters")]
     public async Task<ServiceResultDTO> GetCharacters()
@@ -100,7 +100,7 @@ public class AdminController : Controller
         };
         return result;
     }
-    
+
     //get all characters by category
     [HttpGet("characters/{categoryId:guid}")]
     public async Task<ServiceResultDTO> GetCharactersByCategory(Guid categoryId)
@@ -117,17 +117,17 @@ public class AdminController : Controller
         };
         return result;
     }
-    
+
     //add a character
     [HttpPost("characters")]
-    public async Task<ServiceResultDTO> AddCharacter(Character inputCharacter)
+    public async Task<ServiceResultDTO> AddCharacter(CharacterDTO inputCharacter)
     {
         var createdCharacter = new Character
         {
             Name = inputCharacter.Name,
             CategoryId = inputCharacter.CategoryId,
         };
-        
+
         await _context.Characters.AddAsync(createdCharacter);
         await _context.SaveChangesAsync();
 
@@ -139,7 +139,7 @@ public class AdminController : Controller
 
         return result;
     }
-    
+
     //delete a character
     [HttpDelete("characters/{id:guid}")]
     public async Task<ServiceResultDTO> DeleteCharacter(Guid id)
@@ -152,7 +152,7 @@ public class AdminController : Controller
                 Error = "Character not found",
                 StatusCode = StatusCodes.Status404NotFound
             };
-        
+
         _context.Characters.Remove(character);
         await _context.SaveChangesAsync();
 
@@ -164,6 +164,6 @@ public class AdminController : Controller
 
         return result;
     }
-    
+
     #endregion Characters Endpoints
 }
