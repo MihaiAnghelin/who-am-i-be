@@ -20,7 +20,7 @@ public class AuthController : Controller
         this._tokenEmitterService = tokenEmitterService;
     }
 
-    
+
     [HttpPost("login")]
     public async Task<ServiceResultDTO> Login(LoginDTO input)
     {
@@ -52,10 +52,14 @@ public class AuthController : Controller
                 return result;
             }
 
-            result.Data = new LoginResponseDTO
+            result.Data = new
             {
                 Token = _tokenEmitterService.GenerateAuthToken(existingUser.Id.ToString()),
-                User = existingUser
+                User = new
+                {
+                    existingUser.Username,
+                    existingUser.Id
+                }
             };
 
             return result;

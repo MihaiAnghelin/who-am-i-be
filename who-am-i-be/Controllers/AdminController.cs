@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using who_am_i_be.DTOs;
@@ -37,6 +38,7 @@ public class AdminController : Controller
         return result;
     }
 
+    [Authorize]
     [HttpPost("categories")]
     public async Task<ServiceResultDTO> AddCategory(CategoryDTO categoryInput)
     {
@@ -57,6 +59,7 @@ public class AdminController : Controller
         return result;
     }
 
+    [Authorize]
     [HttpDelete("categories/{id:guid}")]
     public async Task<ServiceResultDTO> DeleteCategory(Guid id)
     {

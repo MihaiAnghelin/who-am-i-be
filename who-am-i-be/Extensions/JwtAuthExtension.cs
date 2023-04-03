@@ -17,14 +17,15 @@ namespace who_am_i_be.Extensions
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
 
                         ValidIssuer = configuration["JwtToken:Issuer"],
                         ValidAudience = configuration["JwtToken:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtToken:IssuerSigningKey"]))
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtToken:IssuerSigningKey"]))
                     };
 
                     options.Events = new JwtBearerEvents
@@ -39,6 +40,7 @@ namespace who_am_i_be.Extensions
                             {
                                 context.Token = accessToken;
                             }
+
                             return Task.CompletedTask;
                         }
                     };
