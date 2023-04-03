@@ -20,6 +20,7 @@ builder.Services.AddDbContext<DataContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.ApplyMigrations();
 
 app.MapSwagger();
 app.UseHttpsRedirection();
@@ -31,6 +32,5 @@ app.AddJwtAuth();
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
