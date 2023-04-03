@@ -21,7 +21,13 @@ public class AdminController : Controller
     [HttpGet("categories")]
     public async Task<ServiceResultDTO> GetCategories()
     {
-        var categories = await _context.Categories.ToListAsync();
+        var categories = await _context.Categories
+            .Select(category => new
+            {
+                Id = category.Id,
+                Name = category.Name,
+            })
+            .ToListAsync();
 
         var result = new ServiceResultDTO()
         {
@@ -32,8 +38,13 @@ public class AdminController : Controller
     }
 
     [HttpPost("categories")]
-    public async Task<ServiceResultDTO> AddCategory(Category category)
+    public async Task<ServiceResultDTO> AddCategory(CategoryDTO categoryInput)
     {
+        var category = new Category
+        {
+            Name = categoryInput.Name
+        };
+
         await _context.Categories.AddAsync(category);
         await _context.SaveChangesAsync();
 
