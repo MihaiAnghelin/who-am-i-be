@@ -7,6 +7,7 @@ using who_am_i_be.Models;
 namespace who_am_i_be.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/admin")]
 public class AdminController : Controller
 {
@@ -38,7 +39,6 @@ public class AdminController : Controller
         return result;
     }
 
-    [Authorize]
     [HttpPost("categories")]
     public async Task<ServiceResultDTO> AddCategory(CategoryDTO categoryInput)
     {
@@ -59,7 +59,6 @@ public class AdminController : Controller
         return result;
     }
 
-    [Authorize]
     [HttpDelete("categories/{id:guid}")]
     public async Task<ServiceResultDTO> DeleteCategory(Guid id)
     {
@@ -96,20 +95,27 @@ public class AdminController : Controller
     [HttpGet("characters")]
     public async Task<ServiceResultDTO> GetCharacters()
     {
-        var characters = await _context.Characters
-            .Include(x => x.Category)
-            /*.Select(x => new Character()
+        var categories = await _context.Categories
+            .Include(c => c.Characters)
+            .Select(c => new
             {
-                Id = x.Id,
-                Name = x.Name,
-                CategoryId = x.CategoryId,
-                Category = x.Category
-            })*/
+                c.Id,
+                c.Name,
+                Characters = c.Characters
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.Name,
+                        x.CategoryId
+                    })
+                    .OrderBy(x => x.Name)
+            })
+            .OrderBy(x => x.Name)
             .ToListAsync();
 
         var result = new ServiceResultDTO()
         {
-            Data = characters,
+            Data = categories,
             StatusCode = StatusCodes.Status200OK
         };
         return result;
