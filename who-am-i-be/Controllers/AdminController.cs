@@ -95,7 +95,7 @@ public class AdminController : Controller
     [HttpGet("characters")]
     public async Task<ServiceResultDTO> GetCharacters()
     {
-        var categories = await _context.Categories
+        var categories = _context.Categories
             .Include(c => c.Characters)
             .Select(c => new
             {
@@ -110,8 +110,8 @@ public class AdminController : Controller
                     })
                     .OrderBy(x => x.Name)
             })
-            .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToList()
+            .OrderBy(x => x.Name);
 
         var result = new ServiceResultDTO()
         {
