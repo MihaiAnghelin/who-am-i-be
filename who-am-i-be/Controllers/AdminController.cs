@@ -95,29 +95,30 @@ public class AdminController : Controller
     [HttpGet("characters")]
     public async Task<ServiceResultDTO> GetCharacters()
     {
-        var categories = _context.Categories
+        var categories = await _context.Categories
             .Include(c => c.Characters)
+            .OrderBy(x => x.Name)
             .Select(c => new
             {
                 c.Id,
                 c.Name,
                 Characters = c.Characters
+                    .OrderBy(x => x.Name)
                     .Select(x => new
                     {
                         x.Id,
                         x.Name,
                         x.CategoryId
                     })
-                    .OrderBy(x => x.Name)
             })
-            .ToList()
-            .OrderBy(x => x.Name);
+            .ToListAsync();
 
         var result = new ServiceResultDTO()
         {
             Data = categories,
             StatusCode = StatusCodes.Status200OK
         };
+
         return result;
     }
 
