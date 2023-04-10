@@ -102,14 +102,16 @@ public class AdminController : Controller
             {
                 c.Id,
                 c.Name,
-                Characters = c.Characters
-                    .OrderBy(x => x.Name)
-                    .Select(x => new
-                    {
-                        x.Id,
-                        x.Name,
-                        x.CategoryId
-                    })
+                Characters =
+                    c.Characters
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.Name,
+                            x.CategoryId
+                        })
+                        .OrderBy(x => x.Name)
+                        .ToList()
             })
             .ToListAsync();
 
