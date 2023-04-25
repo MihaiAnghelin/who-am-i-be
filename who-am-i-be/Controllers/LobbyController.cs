@@ -55,6 +55,24 @@ public class LobbyController : Controller
         };
     }
 
+    [HttpGet("categories")]
+    public async Task<ServiceResultDTO> GetCategories()
+    {
+        var categories = await _context.Categories
+            .Select(category => new
+            {
+                Id = category.Id,
+                Name = category.Name,
+            })
+            .ToListAsync();
+
+        var result = new ServiceResultDTO()
+        {
+            Data = categories,
+            StatusCode = StatusCodes.Status200OK
+        };
+        return result;
+    }
 
     [HttpPost("create")]
     public async Task<ServiceResultDTO> CreateLobby(CreateLobbyDTO lobbyDTO)
