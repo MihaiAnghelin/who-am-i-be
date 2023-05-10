@@ -16,6 +16,40 @@ public class LobbyController : Controller
         _context = context;
     }
 
+    [HttpGet]
+    public async Task<ServiceResultDTO> GetLobby(Guid lobbyId)
+    {
+        var lobby = await _context.Lobbies
+            .Include(x => x.Players)
+            .ThenInclude(x => x.Character)
+            .Select(lob => new
+            {
+                lob.Id,
+                lob.HasGameStarted,
+                lob.CreationDate,
+                players = lob.Players.Select(player => new
+                {
+                    player.Id,
+                    player.Name,
+                    player.IsAdmin,
+                })
+            })
+            .FirstOrDefaultAsync(x => x.Id == lobbyId);
+
+        if (lobby is null)
+            return new ServiceResultDTO
+            {
+                Error = "Lobby not found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
+        return new ServiceResultDTO
+        {
+            Data = lobby,
+            StatusCode = StatusCodes.Status200OK
+        };
+    }
+
     [HttpPost("join")]
     public async Task<ServiceResultDTO> JoinLobby(JoinLobbyDTO lobbyDTO)
     {
