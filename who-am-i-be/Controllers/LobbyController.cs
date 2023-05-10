@@ -88,13 +88,14 @@ public class LobbyController : Controller
 
         var player = new Player
         {
-            Id = default,
             Name = lobbyDTO.AdminPlayer.Name,
             Avatar = lobbyDTO.AdminPlayer.Avatar,
             Color = lobbyDTO.AdminPlayer.Color,
             IsAdmin = true,
             LobbyId = lobby.Id,
         };
+
+        await _context.Players.AddAsync(player);
 
         lobby.Players.Add(player);
 
