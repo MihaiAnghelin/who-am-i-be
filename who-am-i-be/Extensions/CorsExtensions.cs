@@ -13,7 +13,8 @@ namespace who_am_i_be.Extensions
                     {
                         policy.WithOrigins("http://localhost:3000",
                                 "http://192.168.100.35:3000",
-                                "https://who-am-i.mihaianghelin.ro")
+                                "https://who-am-i.mihaianghelin.ro",
+                                "http://192.168.100.58:3000")
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });

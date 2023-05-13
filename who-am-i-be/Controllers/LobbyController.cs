@@ -16,7 +16,7 @@ public class LobbyController : Controller
         _context = context;
     }
 
-    [HttpGet]
+    [HttpGet("{lobbyId:guid}")]
     public async Task<ServiceResultDTO> GetLobby(Guid lobbyId)
     {
         var lobby = await _context.Lobbies
@@ -32,6 +32,14 @@ public class LobbyController : Controller
                     player.Id,
                     player.Name,
                     player.IsAdmin,
+                    character = player.Character == null
+                        ? null
+                        : new
+                        {
+                            player.Character.Id,
+                            player.Character.Name,
+                            CategoryName = player.Character.Category!.Name,
+                        }
                 })
             })
             .FirstOrDefaultAsync(x => x.Id == lobbyId);
@@ -173,10 +181,20 @@ public class LobbyController : Controller
         };
     }
 
-    [HttpGet("getCharacters")]
-    public async Task<ServiceResultDTO> GetCharacters(CharactersLobbyDTO lobbyDTO)
+    [HttpPost("getCharacters")]
+    public async Task<ServiceResultDTO> GetCharacters([FromBody] CharactersLobbyDTO lobbyDTO)
     {
-        if (!lobbyDTO.AdminPlayer.IsAdmin)
+        var adminPlayer = await _context.Players
+            .FirstOrDefaultAsync(player => player.Id == lobbyDTO.AdminPlayer.Id);
+
+        if (adminPlayer is null)
+            return new ServiceResultDTO
+            {
+                Error = "Player not found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
+        if (!adminPlayer.IsAdmin)
             return new ServiceResultDTO
             {
                 Error = "Player is not admin",
@@ -196,7 +214,7 @@ public class LobbyController : Controller
                 StatusCode = StatusCodes.Status404NotFound
             };
 
-        if (lobby.Players.Contains(lobbyDTO.AdminPlayer))
+        if (lobby.Players.All(p => p.Id != adminPlayer.Id))
             return new ServiceResultDTO
             {
                 Error = "Player is not in the lobby",
@@ -235,14 +253,64 @@ public class LobbyController : Controller
         };
     }
 
-    [HttpPost("rerollCharacter/{playerId}")]
-    public async Task<ServiceResultDTO> RerollCharacter(Guid playerId)
+    [HttpPost("rerollCharacter")]
+    public async Task<ServiceResultDTO> RerollCharacter([FromBody] RerollCharacterDTO rerollDTO)
     {
+        var adminPlayer = await _context.Players
+            .FirstOrDefaultAsync(player => player.Id == rerollDTO.AdminPlayerId);
+        
+        if (adminPlayer is null)
+            return new ServiceResultDTO
+            {
+                Error = "Admin not found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
+        if (!adminPlayer.IsAdmin)
+            return new ServiceResultDTO
+            {
+                Error = "Player is not admin",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+        
+        
+        if (!adminPlayer.IsAdmin)
+            return new ServiceResultDTO
+            {
+                Error = "Player is not admin",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
+        var lob = await _context.Lobbies
+            .Include(lobby => lobby.Players)
+            .FirstOrDefaultAsync(lobby => lobby.Id == rerollDTO.LobbyId);
+
+        if (lob is null)
+            return new ServiceResultDTO
+            {
+                Error = "Lobby not found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+
+        if (lob.Players.All(p => p.Id != adminPlayer.Id))
+            return new ServiceResultDTO
+            {
+                Error = "Player is not in the lobby",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+        
+        if(lob.Players.All(p => p.Id != rerollDTO.PlayerToChangeId))
+            return new ServiceResultDTO
+            {
+                Error = "Player to change is not in the lobby",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+        
         var player = await _context.Players
             .Include(player => player.Lobby)
-            .ThenInclude(lobby => lobby.Categories)
+            .ThenInclude(lobby => lobby!.Categories)
             .ThenInclude(category => category.Characters)
-            .FirstOrDefaultAsync(player => player.Id == playerId);
+            .FirstOrDefaultAsync(player => player.Id == rerollDTO.PlayerToChangeId);
 
         if (player is null)
             return new ServiceResultDTO
@@ -252,7 +320,7 @@ public class LobbyController : Controller
             };
 
         var random = new Random();
-        var character = player.Lobby.Categories
+        var character = player.Lobby!.Categories
             .SelectMany(category => category.Characters)
             .Where(character => player.Lobby.Players.All(p => p.CharacterId != character.Id))
             .OrderBy(_ => random.Next())
