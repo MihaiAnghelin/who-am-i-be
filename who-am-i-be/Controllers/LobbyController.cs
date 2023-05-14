@@ -343,7 +343,7 @@ public class LobbyController : Controller
         };
     }
 
-    [HttpDelete("removePlayer")]
+    [HttpPost("removePlayer")]
     public async Task<ServiceResultDTO> RemovePlayer(RemovePlayerDTO lobbyDTO)
     {
         if (!lobbyDTO.AdminPlayer.IsAdmin)
